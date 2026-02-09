@@ -1,0 +1,48 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<project_manager.Models.Project>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Projects";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+    <h1>Projects List</h1>
+    <a asp-action="Create"
+       asp-controller="Projects"
+       class="btn btn-success">
+        <i class="bi bi-plus-lg"></i> Create New
+    </a>
+</div>
+
+<table class="table table-striped table-hover table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Owner Id</th>
+            <th scope="col">Created At</th>
+            <th scope="col" style="width: 250px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var project in Model)
+        {
+            <tr>
+                <td>@project.ProjectId</td>
+                <td class="fw-bold">@project.Name</td>
+                <td>@project.Description</td>
+                <td>@project.OwnerId</td>
+                <td>@project.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("Update", new { id = project.ProjectId })" class="btn btn-sm btn-outline-primary">Update</a>
+                        <a href="@Url.Action("Details", new { id = project.ProjectId })" class="btn btn-sm btn-outline-info">Details</a>
+                        <a href="@Url.Action("Delete", new { id = project.ProjectId })" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

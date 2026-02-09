@@ -1,0 +1,39 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model project_manager.Models.Project
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Details";
+}
+
+<h1 class="mb-4">Project Details</h1>
+
+<div class="card shadow w-50">
+    <div class="card-header bg-primary text-white">
+        Project Information
+    </div>
+    <div class="card-body">
+        <h5 class="card-title display-6">@Model.Name</h5>
+        <p class="card-text lead">@Model.Description</p>
+
+        <hr />
+
+        <div class="mb-2">
+            <strong>Project ID:</strong> @Model.ProjectId
+        </div>
+        <div class="mb-2">
+            <strong>Owner ID:</strong> @Model.OwnerId
+        </div>
+        <div class="mb-2">
+            <strong>Created At:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")
+        </div>
+
+        <hr />
+
+        <div class="btn-group" role="group">
+            <a asp-action="Update" asp-route-id="@Model.ProjectId" class="btn btn-primary">Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.ProjectId" class="btn btn-danger">Delete</a>
+            <a asp-action="Index" asp-controller="Projects" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

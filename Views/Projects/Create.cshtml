@@ -1,0 +1,37 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model project_manager.Models.Project
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create New Project</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" asp-controller="Projects" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Name: </label>
+                <input asp-for="Name" class="form-control" placeholder="Input project name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Description: </label>
+                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Input project description"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="OwnerId" class="form-label">Owner Id: </label>
+                <input asp-for="OwnerId" type="number" class="form-control" placeholder="Input owner id" />
+                <span asp-validation-for="OwnerId" class="text-danger"></span>
+            </div>
+
+            <div class="mt-4">
+                <input class="btn btn-primary" type="submit" value="Create Project" />
+                <a asp-action="Index" asp-controller="Projects" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
