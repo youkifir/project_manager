@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using project_manager.Models;
 using project_manager.Services;
 
@@ -7,35 +10,33 @@ namespace project_manager.Controllers
     public class ProjectsController : Controller
     {
         private readonly IServiceProject _serviceProject;
-        public ProjectsController(IServiceProject serviceProject)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ProjectsController(IServiceProject serviceProject, UserManager<ApplicationUser> userManager)
         {
             _serviceProject = serviceProject;
+            _userManager = userManager;
         }
         //Get: /Projects/Index
-        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            var projects = await _serviceProject.GetAllAsync();
+
+            var userId = _userManager.GetUserId(User);
+            var projects = await _serviceProject.GetUserProjectsAsync(userId);
             return View(projects);
         }
         // GET: /Projects/Details/5
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            if (id == 0)
+            var project = await _serviceProject.GetByIdAsync(id);
+
+            if (project == null || project.OwnerId != _userManager.GetUserId(User))
             {
                 return NotFound();
             }
 
-            try
-            {
-                var project = await _serviceProject.GetByIdAsync(id);
-                return View(project);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+            return View(project);
         }
         //Get: /Projects/Create
         [HttpGet]
@@ -46,12 +47,16 @@ namespace project_manager.Controllers
         //Post: /Projects/Create/
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,OwnerId")]Project project)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("Name,Description")]Project project)
         {
+            var userId = _userManager.GetUserId(User);
+
+            ModelState.Remove("OwnerId");
+
             if (ModelState.IsValid)
             {
-                project.CreatedAt = DateTime.UtcNow;
-                await _serviceProject.CreateAsync(project);
+                await _serviceProject.CreateAsync(project, userId);
                 return RedirectToAction(nameof(Index));
             }
             return View(project);
@@ -78,27 +83,28 @@ namespace project_manager.Controllers
         //Post: /Projects/Update/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [Bind("ProjectId,Name,Description")] Project project)
         {
-            if(id != project.ProjectId)
+            if (id != project.ProjectId) return NotFound();
+
+            var existingProject = await _serviceProject.GetByIdAsync(id);
+            if (existingProject == null || existingProject.OwnerId != _userManager.GetUserId(User))
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    await _serviceProject.UpdateAsync(id, project);
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (KeyNotFoundException)
-                {
-                    return NotFound();
-                }
+                project.OwnerId = existingProject.OwnerId;
+                project.CreatedAt = existingProject.CreatedAt;
+
+                await _serviceProject.UpdateAsync(id, project);
+                return RedirectToAction(nameof(Index));
             }
             return View(project);
         }
+
         //Get: /Projects/Delete
         [HttpGet]
         public async Task<IActionResult> Delete(int id)

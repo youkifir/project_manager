@@ -1,5 +1,33 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model project_manager.Models.Task
+
 @{
+    ViewData["Title"] = "Delete Task";
+    Layout = "_Layout";
 }
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Delete</h3>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">Are you sure you want to delete this task?</p>
+                    <h4 class="text-primary">@Model.Title</h4>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a asp-action="Index" asp-route-projectId="@Model.ProjectId" class="btn btn-secondary">
+                        No, Keep it
+                    </a>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="TaskId" />
+                        <button type="submit" class="btn btn-danger px-4">Yes, Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

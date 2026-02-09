@@ -3,25 +3,35 @@
 
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Project";
 }
 
-<h1 class="text-danger">Delete Project</h1>
-<p class="lead">Are you sure you want to delete this project?</p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card border-danger shadow">
+            <div class="card-header bg-danger text-white text-center py-3">
+                <h3 class="mb-0"><i class="bi bi-exclamation-octagon"></i> Удаление проекта</h3>
+            </div>
+            <div class="card-body py-4 text-center">
+                <p class="lead">Вы уверены, что хотите безвозвратно удалить этот проект?</p>
 
-<div class="alert alert-warning shadow-sm mt-4">
-    <h4 class="alert-heading">Project to be deleted:</h4>
-    <hr>
-    <p class="mb-1"><strong>Id:</strong> @Model.ProjectId</p>
-    <p class="mb-1"><strong>Name:</strong> @Model.Name</p>
-    <p class="mb-1"><strong>Description:</strong> @Model.Description</p>
-    <p class="mb-1"><strong>Owner Id:</strong> @Model.OwnerId</p>
-    <p class="mb-0"><strong>Created At:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                <div class="bg-light p-3 rounded border mb-4">
+                    <h4 class="text-dark">@Model.Name</h4>
+                    <p class="text-muted mb-0">@Model.Description</p>
+                </div>
+
+                <div class="alert alert-warning border-0 small">
+                    <i class="bi bi-info-circle"></i> Все связанные задачи этого проекта также будут удалены.
+                </div>
+            </div>
+            <div class="card-footer bg-white py-3">
+                <form asp-action="Delete" asp-controller="Projects" method="post" class="d-flex justify-content-center gap-3">
+                    <input type="hidden" name="id" value="@Model.ProjectId" />
+
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Отмена</a>
+                    <button type="submit" class="btn btn-danger px-4">Подтвердить удаление</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-
-<form asp-action="Delete" asp-controller="Projects" method="post" class="mt-4">
-    <input type="hidden" name="id" value="@Model.ProjectId" />
-
-    <input class="btn btn-danger" type="submit" value="Confirm Delete" />
-    <a asp-action="Index" asp-controller="Projects" class="btn btn-secondary">Cancel</a>
-</form>

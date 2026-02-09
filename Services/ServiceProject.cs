@@ -6,11 +6,12 @@ namespace project_manager.Services
 {
     public interface IServiceProject
     {
-        public Task<Project> CreateAsync(Project project);
+        public Task<Project> CreateAsync(Project project, string userId);
         public Task<IEnumerable<Project>> GetAllAsync();
         public Task<Project> GetByIdAsync(int id);
         public Task<Project> UpdateAsync(int id, Project project);
         public System.Threading.Tasks.Task DeleteAsync(int id);
+        public Task<List<Project>> GetUserProjectsAsync(string userId);
     }
     public class ServiceProject : IServiceProject
     {
@@ -20,8 +21,10 @@ namespace project_manager.Services
             _db = db;
         }
 
-        public async Task<Project> CreateAsync(Project project)
+        public async Task<Project> CreateAsync(Project project, string userId)
         {
+            project.OwnerId = userId;
+
             await _db.AddAsync(project);
             await _db.SaveChangesAsync();
             return project;
@@ -44,6 +47,13 @@ namespace project_manager.Services
                 throw new KeyNotFoundException($"Project with id {id} not found.");
             }
             return project;
+        }
+
+        public async Task<List<Project>> GetUserProjectsAsync(string userId)
+        {
+            return await _db.Projects
+            .Where(p => p.OwnerId == userId)
+            .ToListAsync();
         }
 
         public async Task<Project> UpdateAsync(int id, Project project)

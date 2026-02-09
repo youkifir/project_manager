@@ -2,36 +2,38 @@
 @model project_manager.Models.Project
 
 @{
+    ViewData["Title"] = "New Project";
     Layout = "_Layout";
-    ViewData["Title"] = "Create";
 }
 
-<h1>Create New Project</h1>
-<hr />
-
-<div class="row">
+<div class="row justify-content-center mt-5">
     <div class="col-md-6">
-        <form asp-action="Create" asp-controller="Projects" method="post">
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label">Name: </label>
-                <input asp-for="Name" class="form-control" placeholder="Input project name" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Create New Project</h3>
             </div>
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label">Description: </label>
-                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Input project description"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="OwnerId" class="form-label">Owner Id: </label>
-                <input asp-for="OwnerId" type="number" class="form-control" placeholder="Input owner id" />
-                <span asp-validation-for="OwnerId" class="text-danger"></span>
-            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="mt-4">
-                <input class="btn btn-primary" type="submit" value="Create Project" />
-                <a asp-action="Index" asp-controller="Projects" class="btn btn-secondary">Cancel</a>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-bold"></label>
+                        <input asp-for="Name" class="form-control" placeholder="Project title..." />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-bold"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Start Project</button>
+                        <a asp-action="Index" class="btn btn-link text-secondary">Cancel</a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>

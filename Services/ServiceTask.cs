@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using project_manager.Data;
-using project_manager.Models;
 
 namespace project_manager.Services
 {
@@ -8,9 +7,10 @@ namespace project_manager.Services
     {
         public Task<Models.Task> CreateAsync(Models.Task task);
         public Task<IEnumerable<Models.Task>> GetAllAsync();
-        public Task<Models.Task> GetByIdAsync(int id);
+        public Task<Models.Task?> GetByIdAsync(int id);
         public Task<Models.Task> UpdateAsync(int id, Models.Task task);
-        public System.Threading.Tasks.Task DeleteAsync(int id);
+        public Task DeleteAsync(int id);
+        public Task<IEnumerable<Models.Task>> GetByProjectIdAsync(int projectId);
     }
 
     public class ServiceTask : IServiceTask
@@ -37,23 +37,25 @@ namespace project_manager.Services
         }
 
         public async Task<IEnumerable<Models.Task>> GetAllAsync()
-            => await _db.Tasks
-                .Include(t => t.Project)
+        {
+            return await _db.Tasks
                 .Include(t => t.AssignedUser)
                 .ToListAsync();
-
-        public async Task<Models.Task> GetByIdAsync(int id)
+        }
+        public async Task<Models.Task?> GetByIdAsync(int id)
         {
-            var task = await _db.Tasks
-                .Include(t => t.Project)
+            return await _db.Tasks
                 .Include(t => t.AssignedUser)
+                .Include(t => t.Project) 
                 .FirstOrDefaultAsync(t => t.TaskId == id);
+        }
 
-            if (task == null)
-            {
-                throw new KeyNotFoundException($"Task with id {id} not found.");
-            }
-            return task;
+        public async Task<IEnumerable<Models.Task>> GetByProjectIdAsync(int projectId)
+        {
+            return await _db.Tasks
+                .Include(t => t.AssignedUser)
+                .Include(t => t.Project)
+                .ToListAsync();
         }
 
         public async Task<Models.Task> UpdateAsync(int id, Models.Task task)

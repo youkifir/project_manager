@@ -1,5 +1,67 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model project_manager.Models.Task
+
 @{
+	Layout = "_Layout";
+	ViewData["Title"] = "Task Details";
+	bool isOverdue = Model.DueDate < DateTime.Now && !Model.IsCompleted;
 }
+
+<div class="container mt-4">
+	<div class="card shadow-sm">
+		<div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+			<h2 class="mb-0">Task: @Model.Title</h2>
+			<div>
+				@if (Model.IsCompleted)
+				{
+					<span class="badge bg-success fs-6">Completed</span>
+				}
+				else if (isOverdue)
+				{
+					<span class="badge bg-danger fs-6">Overdue</span>
+				}
+				else
+				{
+					<span class="badge bg-warning text-dark fs-6">In Progress</span>
+				}
+			</div>
+		</div>
+		<div class="card-body">
+			<div class="row mb-3">
+				<div class="col-sm-3 fw-bold">Description:</div>
+				<div class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "No description provided." : Model.Description)</div>
+			</div>
+
+			<hr />
+
+			<div class="row mb-3">
+				<div class="col-sm-3 fw-bold">Assigned To:</div>
+				<div class="col-sm-9">
+					<i class="bi bi-person-circle"></i>
+					@(Model.AssignedUser?.UserName ?? "Unassigned")
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col-sm-3 fw-bold">Due Date:</div>
+				<div class="col-sm-9 @(isOverdue ? "text-danger fw-bold" : "")">
+					<i class="bi bi-calendar-event"></i>
+					@Model.DueDate.ToString("f")
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col-sm-3 fw-bold">Project:</div>
+				<div class="col-sm-9">
+					<span class="badge bg-secondary">@Model.Project?.Name</span>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer bg-light">
+			<div class="btn-group">
+				<a asp-action="Update" asp-route-id="@Model.TaskId" class="btn btn-primary">Edit Task</a>
+				<a asp-action="Index" asp-route-projectId="@Model.ProjectId" class="btn btn-outline-secondary">Back to List</a>
+			</div>
+		</div>
+	</div>
+</div>
