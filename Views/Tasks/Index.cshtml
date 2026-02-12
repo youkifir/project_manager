@@ -7,21 +7,6 @@
     var projectId = ViewBag.ProjectId;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-    <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
-                <li class="breadcrumb-item active">@ViewBag.ProjectName</li>
-            </ol>
-        </nav>
-        <h1>Project Tasks</h1>
-    </div>
-    <a asp-action="Create" asp-route-projectId="@projectId" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Add Task
-    </a>
-</div>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="mb-0">Tasks for @ViewBag.ProjectName</h2>
