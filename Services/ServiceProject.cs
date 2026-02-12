@@ -62,7 +62,7 @@ namespace project_manager.Services
 
             project_for_update.Name = project.Name;
             project_for_update.Description = project.Description;
-            project_for_update.UpdateAt = DateTime.UtcNow;
+            project_for_update.UpdateAt = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return project_for_update;

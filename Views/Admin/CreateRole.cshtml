@@ -1,0 +1,45 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Create New Role";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Projects">Projects</a></li>
+                <li class="breadcrumb-item"><a asp-action="ListRoles">Roles</a></li>
+                <li class="breadcrumb-item active">Create</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h3 class="mb-0"><i class="bi bi-shield-plus"></i> Create New Role</h3>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateRole" method="post">
+                    <div asp-validation-summary="All" class="text-danger small"></div>
+
+                    <div class="mb-4">
+                        <label for="roleName" class="form-label fw-bold">Role Name</label>
+                        <input name="roleName" id="roleName" class="form-control form-control-lg"
+                               placeholder="e.g. Project Manager, Team Member" required />
+                        <div class="form-text">Role names are used to control access to system features.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Create Role
+                        </button>
+                        <a asp-action="ListRoles" class="btn btn-link text-secondary text-decoration-none">
+                            Cancel and Go Back
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

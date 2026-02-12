@@ -3,7 +3,7 @@
 
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Задачи проекта";
+    ViewData["Title"] = "Project Tasks";
     var projectId = ViewBag.ProjectId;
 }
 
@@ -11,25 +11,91 @@
     <div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Проекты</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
                 <li class="breadcrumb-item active">@ViewBag.ProjectName</li>
             </ol>
         </nav>
-        <h1>Задачи проекта</h1>
+        <h1>Project Tasks</h1>
     </div>
     <a asp-action="Create" asp-route-projectId="@projectId" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Добавить задачу
+        <i class="bi bi-plus-circle"></i> Add Task
     </a>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Tasks for @ViewBag.ProjectName</h2>
+    </div>
+
+    <div class="d-flex gap-2">
+        <div class="dropdown">
+            <button class="btn btn-dark btn-sm dropdown-toggle shadow-sm" type="button" id="sortMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-sort-alpha-down"></i>
+                Sort by:
+                <strong>
+                    @if (ViewBag.CurrentSort == "A-Z")
+                    {
+                        <text>Name (A-Z)</text>
+                    }
+                    else if (ViewBag.CurrentSort == "Z-A")
+                    {
+                        <text>Name (Z-A)</text>
+                    }
+                    else if (ViewBag.CurrentSort == "date_asced")
+                    {
+                        <text>Urgent First</text>
+                    }
+                    else if (ViewBag.CurrentSort == "date_desc")
+                    {
+                        <text>Latest First</text>
+                    }
+                    else
+                    {
+                        <text>Default</text>
+                    }
+                </strong>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="sortMenu">
+                <li><h6 class="dropdown-header">By Name</h6></li>
+                <li>
+                    <a class="dropdown-item @(ViewBag.CurrentSort == "A-Z" ? "active" : "")"
+                       asp-action="Index" asp-route-projectId="@ViewBag.ProjectId" asp-route-sortOrder="A-Z">Alphabetical (A-Z)</a>
+                </li>
+                <li>
+                    <a class="dropdown-item @(ViewBag.CurrentSort == "Z-A" ? "active" : "")"
+                       asp-action="Index" asp-route-projectId="@ViewBag.ProjectId" asp-route-sortOrder="Z-A">Alphabetical (Z-A)</a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">By Deadline</h6></li>
+                <li>
+                    <a class="dropdown-item @(ViewBag.CurrentSort == "date_asced" ? "active" : "")"
+                       asp-action="Index" asp-route-projectId="@ViewBag.ProjectId" asp-route-sortOrder="date_asced">Soonest First</a>
+                </li>
+                <li>
+                    <a class="dropdown-item @(ViewBag.CurrentSort == "date_desc" ? "active" : "")"
+                       asp-action="Index" asp-route-projectId="@ViewBag.ProjectId" asp-route-sortOrder="date_desc">Latest First</a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" asp-action="Index" asp-route-projectId="@ViewBag.ProjectId">Reset Sorting</a></li>
+            </ul>
+        </div>
+
+        <a asp-action="Create" asp-route-projectId="@ViewBag.ProjectId" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg"></i> New Task
+        </a>
+    </div>
 </div>
 
 <table class="table table-hover align-middle shadow-sm">
     <thead class="table-dark">
         <tr>
-            <th>Заголовок</th>
-            <th>Исполнитель</th> @**@
-            <th>Срок выполнения</th> @**@
-            <th>Статус</th>
-            <th style="width: 200px;">Действия</th>
+            <th>Title</th>
+            <th>Assignee</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th style="width: 200px;">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -42,7 +108,7 @@
                 </td>
                 <td>
                     <i class="bi bi-person"></i>
-                    @(task.AssignedUser?.UserName ?? "Не назначен")
+                    @(task.AssignedUser?.UserName ?? "Unassigned")
                 </td>
                 <td class="@(isOverdue ? "text-danger fw-bold" : "")">
                     @task.DueDate.ToString("dd.MM.yyyy HH:mm")
@@ -50,18 +116,18 @@
                 <td>
                     @if (task.IsCompleted)
                     {
-                        <span class="badge bg-success">Выполнена</span>
+                        <span class="badge bg-success">Completed</span>
                     }
                     else
                     {
-                        <span class="badge bg-primary">В работе</span>
+                        <span class="badge bg-primary">In Progress</span>
                     }
                 </td>
                 <td>
                     <div class="btn-group">
-                        <a asp-action="Details" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-info">Детали</a>
-                        <a asp-action="Update" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-primary">Изменить</a>
-                        <a asp-action="Delete" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-danger">Удалить</a>
+                        <a asp-action="Details" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-info">Details</a>
+                        <a asp-action="Update" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@task.TaskId" class="btn btn-sm btn-outline-danger">Delete</a>
                     </div>
                 </td>
             </tr>
@@ -71,5 +137,5 @@
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">В этом проекте пока нет задач. Создайте первую!</div>
+    <div class="alert alert-info">There are no tasks in this project yet. Create the first one!</div>
 }

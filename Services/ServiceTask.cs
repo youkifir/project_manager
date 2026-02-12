@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using project_manager.Data;
+using project_manager.Models;
 
 namespace project_manager.Services
 {
@@ -9,7 +10,7 @@ namespace project_manager.Services
         public Task<IEnumerable<Models.Task>> GetAllAsync();
         public Task<Models.Task?> GetByIdAsync(int id);
         public Task<Models.Task> UpdateAsync(int id, Models.Task task);
-        public Task DeleteAsync(int id);
+        public System.Threading.Tasks.Task DeleteAsync(int id);
         public Task<IEnumerable<Models.Task>> GetByProjectIdAsync(int projectId);
     }
 
@@ -24,8 +25,10 @@ namespace project_manager.Services
 
         public async Task<Models.Task> CreateAsync(Models.Task task)
         {
+            task.IsCompleted = false;
             await _db.Tasks.AddAsync(task);
             await _db.SaveChangesAsync();
+
             return task;
         }
 

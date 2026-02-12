@@ -19,15 +19,35 @@ public class TasksController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int projectId)
+    public async Task<IActionResult> Index(int projectId, string sortOrder)
     {
         var tasks = await _serviceTask.GetByProjectIdAsync(projectId);
+        switch (sortOrder)
+        {
+            case "A-Z":
+                tasks = tasks.OrderBy(t => t.Title).ToList();
+                break;
+            case "Z-A":
+                tasks = tasks.OrderByDescending(t => t.Title).ToList();
+                break;
+            case "date_asced":
+                tasks = tasks.OrderBy(t => t.DueDate).ToList();
+                break;
+            case "date_desc":
+                tasks = tasks.OrderByDescending(t => t.DueDate).ToList();
+                break;
+            default:
+                tasks = tasks.OrderBy(t => t.TaskId).ToList();
+                break;
+        }
+
 
         var project = await _serviceProject.GetByIdAsync(projectId);
         if (project == null) return NotFound();
 
         ViewBag.ProjectName = project.Name;
         ViewBag.ProjectId = projectId;
+        ViewBag.CurrentSort = sortOrder;
 
         return View(tasks);
     }
@@ -47,10 +67,8 @@ public class TasksController : Controller
     public async Task<IActionResult> Create([Bind("Title,Description,DueDate,ProjectId,AssignedUserId")] project_manager.Models.Task task)
     {
         if (ModelState.IsValid)
-        {
-            task.IsCompleted = false;
+        { 
             await _serviceTask.CreateAsync(task);
-
             return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
         }
 

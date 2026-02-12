@@ -1,0 +1,51 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityRole>
+
+@{
+    ViewData["Title"] = "Role Management";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
+            <li class="breadcrumb-item active">Role Management</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h3 class="mb-0">System Roles</h3>
+            <a asp-action="CreateRole" class="btn btn-light btn-sm">
+                <i class="bi bi-plus-circle"></i> Add New Role
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Role ID</th>
+                        <th>Role Name</th>
+                        <th class="text-center">Permissions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var role in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 small text-muted">@role.Id</td>
+                            <td>
+                                <span class="badge bg-primary px-3">@role.Name</span>
+                            </td>
+                            <td class="text-center text-muted italic">
+                                System Level Access
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

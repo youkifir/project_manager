@@ -18,11 +18,21 @@ namespace project_manager.Controllers
         }
         //Get: /Projects/Index
         [Authorize]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
 
             var userId = _userManager.GetUserId(User);
             var projects = await _serviceProject.GetUserProjectsAsync(userId);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                projects = projects
+                    .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            ViewBag.CuurentFilter = searchTerm;
+
             return View(projects);
         }
         // GET: /Projects/Details/5

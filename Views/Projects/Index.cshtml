@@ -2,52 +2,78 @@
 @model IEnumerable<project_manager.Models.Project>
 
 @{
-    Layout = "_Layout";
-    ViewData["Title"] = "Projects";
+	Layout = "_Layout";
+	ViewData["Title"] = "Projects";
 }
 
+
+
 <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-    <h1>Projects List</h1>
-    <a asp-action="Create"
-       asp-controller="Projects"
-       class="btn btn-success">
-        <i class="bi bi-plus-lg"></i> Create New
-    </a>
+	<h1>Projects List</h1>
+	<div class="d-flex gap-2">
+		@if (User.IsInRole("Admin"))
+		{
+			<a asp-action="ListRoles" asp-controller="Admin" class="btn btn-outline-dark">
+				<i class="bi bi-shield-lock"></i> Manage Roles
+			</a>
+
+			<a asp-action="UsersList" asp-controller="Admin" class="btn btn-outline-primary">
+				<i class="bi bi-people"></i> Manage Users
+			</a>
+		}
+
+		<a asp-action="Create" asp-controller="Projects" class="btn btn-success">
+			<i class="bi bi-plus-lg"></i> Create New Project
+		</a>
+	</div>
 </div>
 
-<table class="table table-striped table-hover table-bordered align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Created At</th>
-            <th scope="col" style="width: 300px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var project in Model)
-        {
-            <tr>
-                <td>@project.ProjectId</td>
-                <td class="fw-bold">@project.Name</td>
-                <td>@project.Description</td>
-                <td>@project.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <a asp-controller="Tasks"
-                           asp-action="Index"
-                           asp-route-projectId="@project.ProjectId"
-                           class="btn btn-sm btn-primary">
-                            <i class="bi bi-list-task"></i> Tasks
-                        </a>
+<form asp-action="Index" method="get" class="mb-4">
+	<div class="input-group shadow-sm">
+		<span class="input-group-text bg-white border-end-0">
+			<i class="bi bi-search text-muted"></i>
+		</span>
+		<input type="text" name="searchTerm" value="@ViewBag.CurrentFilter"
+			   class="form-control border-start-0 ps-0"
+			   placeholder="Search projects by name..." />
+		<button type="submit" class="btn btn-primary px-4">Search</button>
+		<a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+	</div>
+</form>
 
-                        <a href="@Url.Action("Update", new { id = project.ProjectId })" class="btn btn-sm btn-outline-primary">Update</a>
-                        <a href="@Url.Action("Details", new { id = project.ProjectId })" class="btn btn-sm btn-outline-info">Details</a>
-                        <a href="@Url.Action("Delete", new { id = project.ProjectId })" class="btn btn-sm btn-outline-danger">Delete</a>
-                    </div>
-                </td>
-            </tr>
-        }
-    </tbody>
+<table class="table table-striped table-hover table-bordered align-middle">
+	<thead class="table-dark">
+		<tr>
+			<th scope="col">Id</th>
+			<th scope="col">Name</th>
+			<th scope="col">Description</th>
+			<th scope="col">Created At</th>
+			<th scope="col" style="width: 300px;">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var project in Model)
+		{
+			<tr>
+				<td>@project.ProjectId</td>
+				<td class="fw-bold">@project.Name</td>
+				<td>@project.Description</td>
+				<td>@project.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+				<td>
+					<div class="btn-group" role="group">
+						<a asp-controller="Tasks"
+						   asp-action="Index"
+						   asp-route-projectId="@project.ProjectId"
+						   class="btn btn-sm btn-primary">
+							<i class="bi bi-list-task"></i> Tasks
+						</a>
+
+						<a href="@Url.Action("Update", new { id = project.ProjectId })" class="btn btn-sm btn-outline-primary">Update</a>
+						<a href="@Url.Action("Details", new { id = project.ProjectId })" class="btn btn-sm btn-outline-info">Details</a>
+						<a href="@Url.Action("Delete", new { id = project.ProjectId })" class="btn btn-sm btn-outline-danger">Delete</a>
+					</div>
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>
