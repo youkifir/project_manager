@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using project_manager.Models;
+using project_manager.Models.Entities;
 
 namespace project_manager.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Project> Projects { get; set; }
-        public DbSet<Models.Task> Tasks { get; set; }
+        public DbSet<ProjectTask> ProjectTasks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -23,13 +23,13 @@ namespace project_manager.Data
                 .HasForeignKey(p => p.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Models.Task>()
+            modelBuilder.Entity<ProjectTask>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.Tasks)
                 .HasForeignKey(t => t.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Models.Task>()
+            modelBuilder.Entity<ProjectTask>()
                 .HasOne(t => t.AssignedUser)
                 .WithMany(u => u.AssignedTasks)
                 .HasForeignKey(t => t.AssignedUserId)

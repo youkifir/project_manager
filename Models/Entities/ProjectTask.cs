@@ -2,9 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace project_manager.Models
+namespace project_manager.Models.Entities
 {
-    public class Task
+    public class ProjectTask
     {
         [Key]
         public int TaskId { get; set; }

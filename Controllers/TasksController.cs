@@ -1,156 +1,139 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using project_manager.Models;
+using project_manager.Models.Entities;
 using project_manager.Services;
 
-public class TasksController : Controller
+namespace project_manager.Controllers
 {
-    private readonly IServiceTask _serviceTask;
-    private readonly IServiceProject _serviceProject;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public TasksController(IServiceTask serviceTask, IServiceProject serviceProject, UserManager<ApplicationUser> userManager)
+    [Authorize]
+    public class TasksController : Controller
     {
-        _serviceTask = serviceTask;
-        _serviceProject = serviceProject;
-        _userManager = userManager;
-    }
+        private readonly IServiceTask _serviceTask;
+        private readonly IServiceProject _serviceProject;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    [HttpGet]
-    public async Task<IActionResult> Index(int projectId, string sortOrder)
-    {
-        var tasks = await _serviceTask.GetByProjectIdAsync(projectId);
-        switch (sortOrder)
+        public TasksController(IServiceTask serviceTask, IServiceProject serviceProject, UserManager<ApplicationUser> userManager)
         {
-            case "A-Z":
-                tasks = tasks.OrderBy(t => t.Title).ToList();
-                break;
-            case "Z-A":
-                tasks = tasks.OrderByDescending(t => t.Title).ToList();
-                break;
-            case "date_asced":
-                tasks = tasks.OrderBy(t => t.DueDate).ToList();
-                break;
-            case "date_desc":
-                tasks = tasks.OrderByDescending(t => t.DueDate).ToList();
-                break;
-            default:
-                tasks = tasks.OrderBy(t => t.TaskId).ToList();
-                break;
+            _serviceTask = serviceTask;
+            _serviceProject = serviceProject;
+            _userManager = userManager;
         }
 
+        private string CurrentUserId => _userManager.GetUserId(User);
 
-        var project = await _serviceProject.GetByIdAsync(projectId);
-        if (project == null) return NotFound();
-
-        ViewBag.ProjectName = project.Name;
-        ViewBag.ProjectId = projectId;
-        ViewBag.CurrentSort = sortOrder;
-
-        return View(tasks);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Create(int projectId)
-    {
-        var users = await _userManager.Users.ToListAsync();
-
-        ViewBag.Users = new SelectList(users, "Id", "UserName");
-        ViewBag.ProjectId = projectId;
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,Description,DueDate,ProjectId,AssignedUserId")] project_manager.Models.Task task)
-    {
-        if (ModelState.IsValid)
-        { 
-            await _serviceTask.CreateAsync(task);
-            return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
-        }
-
-        var users = await _userManager.Users.ToListAsync();
-        ViewBag.Users = new SelectList(users, "Id", "UserName");
-        return View(task);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Update(int? id)
-    {
-        if (id == null || id == 0) return NotFound();
-
-        var task = await _serviceTask.GetByIdAsync(id.Value);
-
-        if (task == null) return NotFound();
-
-        var users = await _userManager.Users.ToListAsync();
-        ViewBag.Users = new SelectList(users, "Id", "UserName", task.AssignedUserId);
-        return View(task);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(int id, [Bind("TaskId,Title,Description,DueDate,IsCompleted,ProjectId,AssignedUserId")] project_manager.Models.Task task)
-    {
-        if (id != task.TaskId) return NotFound();
-
-        ModelState.Remove("Project");
-        ModelState.Remove("AssignedUser");
-
-        if (ModelState.IsValid)
+        // GET: /Tasks/Index?projectId=5
+        public async Task<IActionResult> Index(int projectId, string sortOrder)
         {
-            await _serviceTask.UpdateAsync(id, task);
-            return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
+            var tasks = await _serviceTask.GetTasksByProjectAsync(projectId, CurrentUserId, sortOrder);
+
+            var project = await _serviceProject.GetByIdAsync(projectId, CurrentUserId);
+            if (project == null) return NotFound();
+
+            ViewBag.ProjectName = project.Name;
+            ViewBag.ProjectId = projectId;
+            ViewBag.CurrentSort = sortOrder;
+
+            return View(tasks);
         }
 
-        var users = _userManager.Users.ToList();
-        ViewBag.Users = new SelectList(users, "Id", "UserName", task.AssignedUserId);
-        return View(task);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        if (id <= 0)
+        // GET: /Tasks/Create?projectId=5
+        public async Task<IActionResult> Create(int projectId)
         {
-            return NotFound();
+            var project = await _serviceProject.GetByIdAsync(projectId, CurrentUserId);
+            if (project == null) return NotFound();
+
+            var users = await _userManager.Users.ToListAsync();
+            ViewBag.Users = new SelectList(users, "Id", "UserName");
+            ViewBag.ProjectId = projectId;
+            return View();
         }
 
-        var task = await _serviceTask.GetByIdAsync(id);
-
-        if (task == null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProjectTask task)
         {
-            return NotFound();
+            ModelState.Remove("Project");
+            ModelState.Remove("AssignedUser");
+
+            if (ModelState.IsValid)
+            {
+                var result = await _serviceTask.CreateAsync(task, CurrentUserId);
+                if (result != null)
+                    return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
+
+                ModelState.AddModelError("", "Ошибка доступа к проекту.");
+            }
+
+            var users = await _userManager.Users.ToListAsync();
+            ViewBag.Users = new SelectList(users, "Id", "UserName", task.AssignedUserId);
+            ViewBag.ProjectId = task.ProjectId;
+            return View(task);
         }
 
-        return View(task);
-    }
+        // GET: /Tasks/Update/5
+        public async Task<IActionResult> Update(int id)
+        {
+            var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
+            if (task == null) return NotFound();
 
-    [HttpGet]
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null) return NotFound();
+            var users = await _userManager.Users.ToListAsync();
+            ViewBag.Users = new SelectList(users, "Id", "UserName", task.AssignedUserId);
+            return View(task);
+        }
 
-        var task = await _serviceTask.GetByIdAsync(id.Value);
-        if (task == null) return NotFound();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(int id, ProjectTask task)
+        {
+            if (id != task.TaskId) return NotFound();
 
-        return View(task);
-    }
+            ModelState.Remove("Project");
+            ModelState.Remove("AssignedUser");
 
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var task = await _serviceTask.GetByIdAsync(id);
-        if (task == null) return NotFound();
+            if (ModelState.IsValid)
+            {
+                var result = await _serviceTask.UpdateAsync(id, task, CurrentUserId);
+                if (result != null)
+                    return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
+            }
 
-        int projectId = task.ProjectId;
+            var users = await _userManager.Users.ToListAsync();
+            ViewBag.Users = new SelectList(users, "Id", "UserName", task.AssignedUserId);
+            return View(task);
+        }
 
-        await _serviceTask.DeleteAsync(id);
+        // GET: /Tasks/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
+            if (task == null) return NotFound();
 
-        return RedirectToAction(nameof(Index), new { projectId = projectId });
+            return View(task);
+        }
+
+        // GET: /Tasks/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
+            if (task == null) return NotFound();
+
+            return View(task);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
+            if (task == null) return NotFound();
+
+            int projectId = task.ProjectId;
+            await _serviceTask.DeleteAsync(id, CurrentUserId);
+
+            return RedirectToAction(nameof(Index), new { projectId = projectId });
+        }
     }
 }

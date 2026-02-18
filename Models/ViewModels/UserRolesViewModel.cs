@@ -1,4 +1,6 @@
-﻿namespace project_manager.Models
+﻿using project_manager.Models.Entities;
+
+namespace project_manager.Models.ViewModels
 {
     public class UserRolesViewModel
     {

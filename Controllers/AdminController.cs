@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using project_manager.Models;
+using project_manager.Models.Entities;
+using project_manager.Models.ViewModels;
 
 namespace project_manager.Controllers
 {

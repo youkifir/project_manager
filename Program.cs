@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using project_manager.Data;
-using project_manager.Models;
+using project_manager.Models.Entities;
 using project_manager.Services;
+using System.Text;
 
 public class Program
 {
@@ -15,8 +18,8 @@ public class Program
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
 
-        builder.Services.AddScoped<IServiceProject, ServiceProject>();
-        builder.Services.AddScoped<IServiceTask, ServiceTask>();
+        builder.Services.AddScoped<IServiceProject, ProjectService>();
+        builder.Services.AddScoped<IServiceTask, TasksService>();
 
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
@@ -31,6 +34,33 @@ public class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+        })
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
+        });
+
+        builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        });
+
+        builder.Services.AddAuthorization();
+
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.LoginPath = "/Account/Login";
@@ -38,18 +68,19 @@ public class Program
             options.AccessDeniedPath = "/Account/AccessDenied";
         });
 
+
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles(); 
+        app.UseStaticFiles();
 
         app.UseRouting();
 
-        app.UseAuthentication(); 
-        app.UseAuthorization();  
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllerRoute(
             name: "default",

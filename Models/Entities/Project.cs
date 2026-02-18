@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace project_manager.Models
+namespace project_manager.Models.Entities
 {
     public class Project
     {
@@ -18,6 +18,6 @@ namespace project_manager.Models
         public string OwnerId { get; set; } = string.Empty;
         [ForeignKey("OwnerId")]
         public ApplicationUser? Owner { get; set; }
-        public ICollection<Task>? Tasks { get; set; }
+        public ICollection<ProjectTask>? Tasks { get; set; }
     }
 }

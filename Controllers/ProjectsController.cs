@@ -1,154 +1,104 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using project_manager.Models;
+using project_manager.Models.DTOs;
+using project_manager.Models.Entities;
 using project_manager.Services;
 
 namespace project_manager.Controllers
 {
+    [Authorize]
     public class ProjectsController : Controller
     {
         private readonly IServiceProject _serviceProject;
         private readonly UserManager<ApplicationUser> _userManager;
+
         public ProjectsController(IServiceProject serviceProject, UserManager<ApplicationUser> userManager)
         {
             _serviceProject = serviceProject;
             _userManager = userManager;
         }
-        //Get: /Projects/Index
-        [Authorize]
+
+        private string CurrentUserId => _userManager.GetUserId(User);
+
         public async Task<IActionResult> Index(string searchTerm)
         {
+            var projects = await _serviceProject.GetUserProjectsAsync(CurrentUserId, searchTerm);
 
-            var userId = _userManager.GetUserId(User);
-            var projects = await _serviceProject.GetUserProjectsAsync(userId);
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                projects = projects
-                    .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-            ViewBag.CuurentFilter = searchTerm;
-
+            ViewBag.CurrentFilter = searchTerm;
             return View(projects);
         }
-        // GET: /Projects/Details/5
-        [HttpGet]
+
         public async Task<IActionResult> Details(int id)
         {
-            var project = await _serviceProject.GetByIdAsync(id);
+            var project = await _serviceProject.GetByIdAsync(id, CurrentUserId);
 
-            if (project == null || project.OwnerId != _userManager.GetUserId(User))
-            {
-                return NotFound();
-            }
+            if (project == null) return NotFound();
 
             return View(project);
         }
-        //Get: /Projects/Create
-        [HttpGet]
+
         public IActionResult Create()
         {
             return View();
         }
-        //Post: /Projects/Create/
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public async Task<IActionResult> Create([Bind("Name,Description")]Project project)
+        public async Task<IActionResult> Create([Bind("Name,Description")] Project project)
         {
-            var userId = _userManager.GetUserId(User);
-
             ModelState.Remove("OwnerId");
 
             if (ModelState.IsValid)
             {
-                await _serviceProject.CreateAsync(project, userId);
+                await _serviceProject.CreateAsync(project, CurrentUserId);
                 return RedirectToAction(nameof(Index));
             }
             return View(project);
         }
-        //Get: /Projects/Udpate
-        [HttpGet]
+
         public async Task<IActionResult> Update(int id)
         {
-            if(id == 0)
-            {
-                return NotFound();
-            }
-            try
-            {
-                var project = await _serviceProject.GetByIdAsync(id);
-                return View(project);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            
-        }
-        //Post: /Projects/Update/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize]
-        public async Task<IActionResult> Update(int id, [Bind("ProjectId,Name,Description")] Project project)
-        {
-            if (id != project.ProjectId) return NotFound();
+            var project = await _serviceProject.GetByIdAsync(id, CurrentUserId);
 
-            var existingProject = await _serviceProject.GetByIdAsync(id);
-            if (existingProject == null || existingProject.OwnerId != _userManager.GetUserId(User))
-            {
-                return NotFound();
-            }
+            if (project == null) return NotFound();
 
-            if (ModelState.IsValid)
-            {
-                project.OwnerId = existingProject.OwnerId;
-                project.CreatedAt = existingProject.CreatedAt;
-
-                await _serviceProject.UpdateAsync(id, project);
-                return RedirectToAction(nameof(Index));
-            }
             return View(project);
         }
 
-        //Get: /Projects/Delete
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(int id, ProjectDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _serviceProject.UpdateAsync(id, model, CurrentUserId);
+
+                if (result == null) return NotFound();
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
+
         public async Task<IActionResult> Delete(int id)
         {
-            if (id == 0)
-            {
-                return NotFound();
-            }
+            var project = await _serviceProject.GetByIdAsync(id, CurrentUserId);
 
-            try
-            {
-                var project = await _serviceProject.GetByIdAsync(id);
-                return View(project);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+            if (project == null) return NotFound();
+
+            return View(project);
         }
-        //Post: /Projects/Delete/5
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                await _serviceProject.DeleteAsync(id);
-                return RedirectToAction(nameof(Index));
-            }
-            catch(KeyNotFoundException)
-            {
-                return NotFound();
-            }
-        }
+            var result = await _serviceProject.DeleteAsync(id, CurrentUserId);
 
+            if (result == null) return NotFound();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

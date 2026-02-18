@@ -1,5 +1,5 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<project_manager.Models.Project>
+@model IEnumerable<project_manager.Models.Entities.Project>
 
 @{
 	Layout = "_Layout";
@@ -44,7 +44,6 @@
 <table class="table table-striped table-hover table-bordered align-middle">
 	<thead class="table-dark">
 		<tr>
-			<th scope="col">Id</th>
 			<th scope="col">Name</th>
 			<th scope="col">Description</th>
 			<th scope="col">Created At</th>
@@ -55,7 +54,6 @@
 		@foreach (var project in Model)
 		{
 			<tr>
-				<td>@project.ProjectId</td>
 				<td class="fw-bold">@project.Name</td>
 				<td>@project.Description</td>
 				<td>@project.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>

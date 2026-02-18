@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace project_manager.Models
+namespace project_manager.Models.Entities
 {
     public class ApplicationUser : IdentityUser
     {
         public ICollection<Project>? OwnedProjects { get; set; }
-        public ICollection<Task>? AssignedTasks { get; set; }
+        public ICollection<ProjectTask>? AssignedTasks { get; set; }
     }
 }
