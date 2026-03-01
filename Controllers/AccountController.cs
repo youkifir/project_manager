@@ -21,14 +21,12 @@ namespace project_manager.Controllers
             _roleManager = roleManager;
         }
 
-        //Get: /Account/Register
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        //Post: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([Bind("UserName,Email,PasswordHash")] ApplicationUser newUser)

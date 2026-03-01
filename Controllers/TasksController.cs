@@ -24,7 +24,6 @@ namespace project_manager.Controllers
 
         private string CurrentUserId => _userManager.GetUserId(User);
 
-        // GET: /Tasks/Index?projectId=5
         public async Task<IActionResult> Index(int projectId, string sortOrder)
         {
             var tasks = await _serviceTask.GetTasksByProjectAsync(projectId, CurrentUserId, sortOrder);
@@ -39,7 +38,6 @@ namespace project_manager.Controllers
             return View(tasks);
         }
 
-        // GET: /Tasks/Create?projectId=5
         public async Task<IActionResult> Create(int projectId)
         {
             var project = await _serviceProject.GetByIdAsync(projectId, CurrentUserId);
@@ -73,7 +71,6 @@ namespace project_manager.Controllers
             return View(task);
         }
 
-        // GET: /Tasks/Update/5
         public async Task<IActionResult> Update(int id)
         {
             var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
@@ -105,7 +102,6 @@ namespace project_manager.Controllers
             return View(task);
         }
 
-        // GET: /Tasks/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);
@@ -114,7 +110,6 @@ namespace project_manager.Controllers
             return View(task);
         }
 
-        // GET: /Tasks/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var task = await _serviceTask.GetByIdAsync(id, CurrentUserId);

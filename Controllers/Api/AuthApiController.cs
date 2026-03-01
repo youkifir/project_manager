@@ -29,15 +29,14 @@ namespace project_manager.Controllers.Api
             _config = configuration;
         }
 
-        //Post api/auth/login
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByNameAsync(model.UserName);
                 if (user == null) return BadRequest("Wrong username or password");
-                
+
                 var result = await _signInManager.PasswordSignInAsync(
                     user.UserName,
                     model.Password,
@@ -56,6 +55,28 @@ namespace project_manager.Controllers.Api
             }
             return BadRequest(ModelState);
         }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] LoginDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newUser = new ApplicationUser
+            {
+                UserName = model.UserName
+            };
+
+            var result = await _userManager.CreateAsync(newUser, model.Password);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { message = "Регистрация прошла успешно!" });
+            }
+
+            return BadRequest(result.Errors);
+        }
         private string GenerateJwtToken(IdentityUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -64,17 +85,19 @@ namespace project_manager.Controllers.Api
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim("name", user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            var expireMinutes = int.Parse(_config["Jwt:ExpireMinutes"] ?? "60");
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(30),
-                signingCredentials: credentials);
-
+                expires: DateTime.UtcNow.AddMinutes(expireMinutes),
+                signingCredentials: credentials
+            );
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

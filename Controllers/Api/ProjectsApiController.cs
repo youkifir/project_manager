@@ -22,15 +22,13 @@ namespace project_manager.Controllers.Api
             _serviceProject = serviceProject;
         }
 
-        //Get: api/projects/
         [HttpGet]
-        public async Task<IActionResult> GetProjects()
+        public async Task<IActionResult> GetProjects([FromQuery] string? searchTerm = null)
         {
-            var projects = await _serviceProject.GetUserProjectsAsync(CurrentUserId);
+            var projects = await _serviceProject.GetUserProjectsAsync(CurrentUserId, searchTerm);
             return Ok(new { projects = projects });
         }
 
-        //Get: api/projects/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProject(int id)
         {
@@ -41,7 +39,6 @@ namespace project_manager.Controllers.Api
             return Ok(project);
         }
 
-        //Post: api/projects
         [HttpPost]
         public async Task<IActionResult> CreateProject([FromBody] ProjectDto model)
         {
@@ -57,7 +54,6 @@ namespace project_manager.Controllers.Api
             return CreatedAtAction(nameof(GetProject), new { id = createdProject.ProjectId });
         }
 
-        //Delete: api/projects/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(int id)
         {
@@ -66,7 +62,6 @@ namespace project_manager.Controllers.Api
             return Ok(deletedProduct);
         }
 
-        //Put: api/projects/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProject(int id, [FromBody] ProjectDto model)
         {

@@ -21,14 +21,12 @@ namespace project_manager.Controllers
             _userManager = userManager;
         }
 
-        // GET: /Admin/ListRoles
         public IActionResult ListRoles()
         {
             var roles = _roleManager.Roles.ToList();
             return View(roles);
         }
 
-        // GET: /Admin/CreateRole
         public IActionResult CreateRole() => View();
 
         [HttpPost]
@@ -62,7 +60,6 @@ namespace project_manager.Controllers
             return View();
         }
 
-        // GET: /Admin/UsersList
         public async Task<IActionResult> UsersList()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -80,7 +77,6 @@ namespace project_manager.Controllers
             return View(model);
         }
 
-        // GET: /Admin/EditUserRoles/5
         [HttpGet]
         public async Task<IActionResult> EditUserRoles(string userId)
         {

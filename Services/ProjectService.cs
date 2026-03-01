@@ -25,11 +25,10 @@ namespace project_manager.Services
             _db = db;
         }
 
-        // Получение всех проектов пользователя (с опциональным поиском)
         public async Task<List<Project>> GetUserProjectsAsync(string userId, string? searchTerm = null)
         {
             var query = _db.Projects
-                .AsNoTracking() // Ускоряет чтение, так как данные не будут меняться
+                .AsNoTracking()
                 .Where(p => p.OwnerId == userId);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -40,18 +39,16 @@ namespace project_manager.Services
             return await query.ToListAsync();
         }
 
-        // Поиск проекта с проверкой владельца (для Details/Edit/Delete)
         public async Task<Project?> GetByIdAsync(int projectId, string userId)
         {
             return await _db.Projects
                 .FirstOrDefaultAsync(p => p.ProjectId == projectId && p.OwnerId == userId);
         }
 
-        // Создание проекта
         public async Task<Project> CreateAsync(Project project, string userId)
         {
             project.OwnerId = userId;
-            project.CreatedAt = DateTime.UtcNow; // Всегда используем UTC
+            project.CreatedAt = DateTime.UtcNow;
             project.UpdateAt = DateTime.UtcNow;
 
             await _db.Projects.AddAsync(project);
@@ -59,7 +56,6 @@ namespace project_manager.Services
             return project;
         }
 
-        // Обновление (через модель, чтобы защитить системные поля)
         public async Task<Project?> UpdateAsync(int projectId, ProjectDto model, string userId)
         {
             var existingProject = await _db.Projects
@@ -75,7 +71,6 @@ namespace project_manager.Services
             return existingProject;
         }
 
-        // Удаление с проверкой владельца
         public async Task<Project?> DeleteAsync(int projectId, string userId)
         {
             var project = await _db.Projects
@@ -88,7 +83,6 @@ namespace project_manager.Services
             return project;
         }
 
-        // Поиск без привязки к пользователю (только для внутренних нужд системы)
         public async Task<Project?> GetByIdInternalAsync(int projectId)
         {
             return await _db.Projects.FindAsync(projectId);

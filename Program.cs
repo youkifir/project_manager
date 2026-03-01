@@ -67,13 +67,22 @@ public class Program
             options.LogoutPath = "/Account/Logout";
             options.AccessDeniedPath = "/Account/AccessDenied";
         });
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
+        });
 
 
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
-
+        app.UseCors("AllowAll");
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 

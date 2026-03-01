@@ -21,7 +21,6 @@ namespace project_manager.Controllers.Api
 
         private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // POST: api/projectsapi/{id}/tasks/{id}
         [HttpGet("{taskId}")]
         public async Task<IActionResult> GetTask(int projectId, int taskId)
         {
@@ -41,7 +40,6 @@ namespace project_manager.Controllers.Api
             return Ok(tasks);
         }
 
-        // POST: api/projects/3002/tasks
         [HttpPost]
         public async Task<IActionResult> CreateTask(int projectId, [FromBody] ProjectTask task)
         {
@@ -59,7 +57,6 @@ namespace project_manager.Controllers.Api
             return Ok(result);
         }
 
-        // PUT: api/projects/3002/tasks/5
         [HttpPut("{taskId}")]
         public async Task<IActionResult> UpdateTask(int projectId, int taskId, [FromBody] ProjectTask model)
         {
@@ -70,7 +67,6 @@ namespace project_manager.Controllers.Api
             return Ok(updatedTask);
         }
 
-        // DELETE: api/projects/3002/tasks/5
         [HttpDelete("{taskId}")]
         public async Task<IActionResult> DeleteTask(int taskId)
         {
